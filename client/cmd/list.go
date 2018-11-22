@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/labstack/gommon/color"
 	"github.com/spf13/cobra"
@@ -44,7 +43,7 @@ func list(path string) error {
 	}
 	max := 1
 	for _, f := range files {
-		l := len(strconv.Itoa(f.Size))
+		l := len(fmt.Sprintf("%d", f.Size))
 		if max < l {
 			max = l
 		}
