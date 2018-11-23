@@ -9,6 +9,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/Kagami/go-face"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -20,6 +22,7 @@ import (
 
 var _cfgFile string
 
+var rec *face.Recognizer
 var rootCmd = &cobra.Command{
 	Use:     "gds",
 	Short:   "go disk server",
@@ -33,6 +36,24 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 		defer db.Close()
+		// 人脸识别
+		dataDir, _ := filepath.Abs(cmds.GetString(cmd, _dataPathStr))
+		log.Println("人脸识别:", dataDir)
+		go func() {
+			rec, err = face.NewRecognizer(dataDir)
+			if err == nil {
+				gds.InitRec(rec)
+				log.Println("人脸识别初始化成功")
+			} else {
+				log.Println("人脸识别初始化错误:", err.Error())
+			}
+		}()
+		defer func() {
+			if rec != nil {
+				rec.Close()
+			}
+		}()
+
 		gds.Init(db, cmds.GetString(cmd, _tempPathStr), cmds.GetString(cmd, _filesPathStr))
 
 		address := cmds.GetString(cmd, _address)
@@ -72,6 +93,7 @@ func init() {
 	pflags.StringVarP(&_cfgFile, "config", "c", "", "配置文件")
 	pflags.StringP(_tempPathStr, "t", "temp", "临时目录")
 	pflags.StringP(_filesPathStr, "f", "files", "文件目录")
+	pflags.StringP(_dataPathStr, "p", "data", "数据目录")
 
 	flags := rootCmd.Flags()
 	flags.StringP(cmds.DBPathStr, "d", "db", "数据库目录")

@@ -44,37 +44,46 @@ func (d *Files) TempFile() (path string) {
 }
 
 // Save 保存文件
-func (d *Files) Save(file, name, dir string, mod, size int64) ([]byte, error) {
+func (d *Files) Save(file, name, dir string, mod, size int64) error {
 	// 保存文件,记录文件ID
 	fid, err := utils.NewFileID(file)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	fidBs := utils.PrefixBytes(fid.ID(), _FilePrefix)
-	var data File
+	var data *File
 	if has, err := d.DB.Has(fidBs); err == nil && !has {
+		// 创建File
+		if data, err = NewFile(file, name, size); err != nil {
+			return err
+		}
+		data.ID = fid.ID()
+		data.Mod = time.Unix(mod, 0)
+
 		// 重命名
 		path, f := d.getName(fid)
 		kit.Mkdir(path)
-		os.Rename(file, filepath.Join(path, f))
-		data = File{
-			Name: name,
-			Type: FILE,
-			Size: size,
-			ID:   fid.ID(),
-			Ca:   time.Now(),
-			Mod:  time.Unix(mod, 0),
-		}
+		end := filepath.Join(path, f)
+		os.Rename(file, end)
 		d.DB.Put(fidBs, data)
+		if data.Sub == JPEG {
+			// TODO 人脸识别
+			go func() {
+				if faces, err := _rec.RecognizeFile(end); err == nil {
+					d.DB.Put(utils.PrefixBytes(fid.ID(), _RecognitionPrefix), faces)
+				}
+			}()
+		}
 	} else {
 		// 删除
 		os.Remove(file)
-		data = File{}
-		d.DB.Get(fidBs, &data)
+		data = &File{}
+		d.DB.Get(fidBs, data)
+		data.Name = name
 		// TODO 重名检查,名称修改
 	}
-	d.AddFile(dir, data)
-	return fidBs, nil
+	d.AddFile(dir, *data)
+	return nil
 }
 
 func (d *Files) getName(id *utils.FileID) (dir, name string) {
@@ -120,8 +129,9 @@ func init() {
 				return err
 			}
 			mod, _ := strconv.ParseInt(c.FormValue("mod"), 10, 64)
-			// TODO size 尺寸校验
-			_files.Save(f, file.Filename, dir, mod, file.Size)
+			if err := _files.Save(f, file.Filename, dir, mod, file.Size); err != nil {
+				return err
+			}
 			return c.JSON(http.StatusOK, "ok")
 		})
 	})

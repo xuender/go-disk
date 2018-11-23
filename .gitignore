@@ -43,3 +43,5 @@ $RECYCLE.BIN/
 db/
 # files
 files/
+# data
+data/
