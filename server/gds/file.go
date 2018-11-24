@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	filetype "gopkg.in/h2non/filetype.v1"
+	"github.com/h2non/filetype"
 )
 
 const (
