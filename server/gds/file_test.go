@@ -1,29 +1,25 @@
 package gds
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewFile(t *testing.T) {
-	_, err := NewFile("../../LICENSE", "LICENSE", 5)
+	_, err := NewFile("../../LICENSE", "LICENSE")
 	assert.NotNil(t, err)
-
-	file, err := NewFile("../../LICENSE", "LICENSE", 11357)
-	assert.Nil(t, err)
-	assert.NotNil(t, file)
-	assert.Equal(t, file.Size, int64(11357))
-	assert.Equal(t, file.Type, FILE)
-
-	dir, _ := NewFile("..", "server", 11)
-	assert.Equal(t, dir.Size, int64(0))
-	assert.Equal(t, dir.Type, DIR)
 }
 
-func TestNewFile_jpeg(t *testing.T) {
-	jpg, err := NewFile("bona2.jpg", "bona2", 66679)
-	assert.Nil(t, err)
-	assert.Equal(t, jpg.Type, IMAGE)
-	assert.Equal(t, jpg.Sub, JPEG)
+func ExampleNewFile() {
+	ca, _ := time.Parse("2006-01-02", "2018-01-15")
+	f := File{
+		Ca: ca,
+	}
+	fmt.Println(f.Dir())
+
+	// Output:
+	// 2018/01/15
 }

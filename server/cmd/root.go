@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/xuender/go-kit"
 
-	"../../cmds"
 	"../gds"
 )
 
@@ -29,7 +28,7 @@ var rootCmd = &cobra.Command{
 	Version: "v0.0.1",
 	Long:    `网盘服务器`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dbDir, _ := filepath.Abs(cmds.GetString(cmd, cmds.DBPathStr))
+		dbDir, _ := filepath.Abs(kit.CmdString(cmd, _dbPathStr))
 		log.Println("数据库:", dbDir)
 		db, err := kit.NewDB(dbDir)
 		if err != nil {
@@ -37,7 +36,7 @@ var rootCmd = &cobra.Command{
 		}
 		defer db.Close()
 		// 人脸识别
-		dataDir, _ := filepath.Abs(cmds.GetString(cmd, _dataPathStr))
+		dataDir, _ := filepath.Abs(kit.CmdString(cmd, _dataPathStr))
 		log.Println("人脸识别:", dataDir)
 		go func() {
 			rec, err = face.NewRecognizer(dataDir)
@@ -54,9 +53,9 @@ var rootCmd = &cobra.Command{
 			}
 		}()
 
-		gds.Init(db, cmds.GetString(cmd, _tempPathStr), cmds.GetString(cmd, _filesPathStr))
+		gds.Init(db, kit.CmdString(cmd, _tempPathStr), kit.CmdString(cmd, _filesPathStr))
 
-		address := cmds.GetString(cmd, _address)
+		address := kit.CmdString(cmd, _address)
 		// 地址端口号
 		if !strings.HasPrefix(address, ":") {
 			address = ":" + address
@@ -96,7 +95,7 @@ func init() {
 	pflags.StringP(_dataPathStr, "p", "data", "数据目录")
 
 	flags := rootCmd.Flags()
-	flags.StringP(cmds.DBPathStr, "d", "db", "数据库目录")
+	flags.StringP(_dbPathStr, "d", "db", "数据库目录")
 	flags.StringP(_address, "a", "6181", "访问地址端口号")
 }
 

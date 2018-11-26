@@ -1,13 +1,13 @@
 package gds
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
-	"time"
+	"strings"
 
 	"github.com/labstack/echo"
 	"github.com/xuender/go-kit"
@@ -23,17 +23,54 @@ type Files struct {
 
 // List 文件列表
 func (d *Files) List(dir string) (files []File) {
+	key := utils.PrefixBytes([]byte(dir), _DirPrefix)
+	log.Printf("%s, %x\n", dir, key)
 	files = []File{}
-	d.DB.Get(utils.PrefixBytes([]byte(dir), _DirPrefix), &files)
-	log.Println("getFiles:", len(files))
+	if has, err := d.DB.Has(key); err == nil && has {
+		ids := [][]byte{}
+		d.DB.Get(key, &ids)
+		for _, id := range ids {
+			f := File{}
+			if d.DB.Get(id, &f) == nil {
+				files = append(files, f)
+			}
+		}
+	} else {
+		m := map[string]bool{}
+		d.DB.Iterator(key, func(k, value []byte) bool {
+			log.Printf("%v\n", k)
+			m[subName(string(k), len(key))] = true
+			return false
+		})
+		for name := range m {
+			d := File{
+				Name: name,
+				Type: DIR,
+			}
+			files = append(files, d)
+		}
+	}
 	return
+}
+func subName(name string, size int) string {
+	s := name[size:]
+	if s[0] == '/' {
+		s = s[1:]
+	}
+	i := strings.Index(s, "/")
+	if i < 0 {
+		return s
+	}
+	return s[:i]
 }
 
 // AddFile 增加文件
-func (d *Files) AddFile(dir string, file File) error {
-	ids := d.List(dir)
-	ids = append(ids, file)
-	return d.DB.Put(utils.PrefixBytes([]byte(dir), _DirPrefix), ids)
+func (d *Files) AddFile(dir string, fid []byte) error {
+	key := utils.PrefixBytes([]byte(dir), _DirPrefix)
+	ids := [][]byte{}
+	d.DB.Get(key, &ids)
+	ids = append(ids, fid)
+	return d.DB.Put(key, ids)
 }
 
 // TempFile 临时文件
@@ -44,7 +81,7 @@ func (d *Files) TempFile() (path string) {
 }
 
 // Save 保存文件
-func (d *Files) Save(file, name, dir string, mod, size int64) error {
+func (d *Files) Save(file, name string) error {
 	// 保存文件,记录文件ID
 	fid, err := utils.NewFileID(file)
 	if err != nil {
@@ -52,60 +89,37 @@ func (d *Files) Save(file, name, dir string, mod, size int64) error {
 	}
 	fidBs := utils.PrefixBytes(fid.ID(), _FilePrefix)
 	var data *File
+	// 不存在
 	if has, err := d.DB.Has(fidBs); err == nil && !has {
 		// 创建File
-		if data, err = NewFile(file, name, size); err != nil {
+		if data, err = NewFile(file, name); err != nil {
 			return err
 		}
-		data.ID = fid.ID()
-		data.Mod = time.Unix(mod, 0)
-
+		data.ID = fidBs
 		// 重命名
-		path, f := d.getName(fid)
-		kit.Mkdir(path)
-		end := filepath.Join(path, f)
-		os.Rename(file, end)
+		kit.Mkdir(fmt.Sprintf("%s/%s", d.FilesPath, data.Dir()))
+		os.Rename(file, fmt.Sprintf("%s/%s/%s", d.FilesPath, data.Dir(), data.FileName()))
 		d.DB.Put(fidBs, data)
-		if data.Sub == JPEG {
-			// TODO 人脸识别
-			go func() {
-				if faces, err := _rec.RecognizeFile(end); err == nil {
-					d.DB.Put(utils.PrefixBytes(fid.ID(), _RecognitionPrefix), faces)
-				}
-			}()
-		}
+		d.AddFile(data.Dir(), fidBs)
 	} else {
 		// 删除
 		os.Remove(file)
-		data = &File{}
-		d.DB.Get(fidBs, data)
-		data.Name = name
-		// TODO 重名检查,名称修改
 	}
-	d.AddFile(dir, *data)
 	return nil
-}
-
-func (d *Files) getName(id *utils.FileID) (dir, name string) {
-	str := id.String()
-	dir = filepath.Join(d.FilesPath, str[:3], str[3:6])
-	name = str[6:]
-	return
 }
 
 func init() {
 	PutRoute("files", func(g *echo.Group) {
 		// 文件列表
-		g.GET("/:dir", func(c echo.Context) error {
-			dir := c.Param("dir")
+		g.GET("", func(c echo.Context) error {
+			dir := c.QueryParam("dir")
 			log.Println("读取目录", dir)
 			files := _files.List(dir)
 			return c.JSON(http.StatusOK, files)
 		})
 		// 上传文件
-		g.POST("/:dir", func(c echo.Context) error {
-			dir := c.Param("dir")
-			log.Println("上传目录:", dir)
+		g.POST("", func(c echo.Context) error {
+			log.Println("上传")
 			// 来源
 			file, err := c.FormFile("uploadfile")
 			if err != nil {
@@ -128,10 +142,10 @@ func init() {
 			if _, err = io.Copy(dst, src); err != nil {
 				return err
 			}
-			mod, _ := strconv.ParseInt(c.FormValue("mod"), 10, 64)
-			if err := _files.Save(f, file.Filename, dir, mod, file.Size); err != nil {
+			if err := _files.Save(f, file.Filename); err != nil {
 				return err
 			}
+			// TODO 文件尺寸校验,防止错误
 			return c.JSON(http.StatusOK, "ok")
 		})
 	})

@@ -6,9 +6,8 @@ import (
 
 	"github.com/labstack/gommon/color"
 	"github.com/spf13/cobra"
-	utils "github.com/xuender/go-utils"
+	"github.com/xuender/go-utils"
 
-	"../../cmds"
 	"../gdc"
 )
 
@@ -20,7 +19,6 @@ var upCmd = &cobra.Command{
   将文件上传到指定目录`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		color.Println("服务器地址:", color.Blue(serverURL))
-		path := cmds.GetString(cmd, _path)
 		for _, f := range args {
 			color.Println("上传文件:", color.Green(f))
 			fid, err := utils.NewFileID(f)
@@ -29,7 +27,7 @@ var upCmd = &cobra.Command{
 			}
 			// TODO 校验FileID
 			log.Println(fid)
-			code, body, err := gdc.PostFile(f, fmt.Sprintf("%s/api/files/%s", serverURL, path))
+			code, body, err := gdc.PostFile(f, fmt.Sprintf("%s/api/files", serverURL))
 			if err != nil {
 				return err
 			}
@@ -41,6 +39,6 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
-	flags := upCmd.Flags()
-	flags.StringP(_path, "p", ".", "上传目录")
+	// flags := upCmd.Flags()
+	// flags.StringP(_path, "p", ".", "上传目录")
 }

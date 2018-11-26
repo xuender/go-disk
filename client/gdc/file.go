@@ -34,7 +34,6 @@ func PostFile(filename, targetURL string) (statusCode int, body []byte, err erro
 	contentType := bodyWriter.FormDataContentType()
 	if s, err := fh.Stat(); err == nil {
 		bodyWriter.WriteField("size", fmt.Sprintf("%d", s.Size()))
-		bodyWriter.WriteField("mod", fmt.Sprintf("%v", s.ModTime().Unix()))
 	}
 	bodyWriter.Close()
 	resp, err := http.Post(targetURL, contentType, bodyBuf)
