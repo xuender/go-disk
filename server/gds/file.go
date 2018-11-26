@@ -20,12 +20,13 @@ const (
 
 // File 文件
 type File struct {
-	Name string    `json:"name"`           // 名称,可用于排序
-	Type int       `json:"type"`           // 类型
-	Sub  int       `json:"sub,omitempty"`  // 子类型
-	Size int64     `json:"size,omitempty"` // 尺寸
-	Ca   time.Time `json:"ca"`             // 创建时间
-	ID   []byte    `json:"ID"`             // 文件ID
+	Name  string    `json:"name"`           // 名称,可用于排序
+	Type  int       `json:"type"`           // 类型
+	Sub   int       `json:"sub,omitempty"`  // 子类型
+	Size  int64     `json:"size,omitempty"` // 尺寸
+	Ca    time.Time `json:"ca"`             // 创建时间
+	ID    []byte    `json:"ID"`             // 文件ID
+	Faces []Face    `json:"faces"`          // 脸
 }
 
 // Dir 目录
@@ -50,6 +51,15 @@ func NewFile(path, name string) (file *File, err error) {
 		Sub:  JPEG,
 		Size: photo.Size,
 		Ca:   photo.Ca,
+	}
+	file.Faces = []Face{}
+	if photo.Faces != nil {
+		for _, f := range photo.Faces {
+			face := Face{}
+			face.Face = f
+			// TODO 查找 faceID
+			file.Faces = append(file.Faces, face)
+		}
 	}
 	return
 }

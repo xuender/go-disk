@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	_FilePrefix = 'F' // 文件前缀
-	_DirPrefix  = 'D' // 目录前缀
+	_FilePrefix   = 'F' // 文件前缀
+	_DirPrefix    = 'D' // 目录前缀
+	_PeoplePrefix = 'P' // 人
 )
 
 var _files *Files
