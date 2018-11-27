@@ -53,7 +53,8 @@ var rootCmd = &cobra.Command{
 			}
 		}()
 
-		gds.Init(db, kit.CmdString(cmd, _tempPathStr), kit.CmdString(cmd, _filesPathStr))
+		gds.InitDB(db)
+		gds.Init(kit.CmdString(cmd, _tempPathStr), kit.CmdString(cmd, _filesPathStr))
 
 		address := kit.CmdString(cmd, _address)
 		// 地址端口号

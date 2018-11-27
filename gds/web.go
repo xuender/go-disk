@@ -37,9 +37,8 @@ func WebStart(address string) error {
 		}
 		f(api.Group(k))
 	}
-
-	// TODO 静态资源处理
-
+	// 静态资源处理
+	e.Static("/", "www")
 	log.Println("Go Disk 启动...")
 	return e.Start(address)
 }

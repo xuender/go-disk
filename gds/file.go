@@ -57,7 +57,7 @@ func NewFile(path, name string) (file *File, err error) {
 		for _, f := range photo.Faces {
 			face := Face{}
 			face.Face = f
-			// TODO 查找 faceID
+			face.PeopleID = _peoples.PeopleID(f)
 			file.Faces = append(file.Faces, face)
 		}
 	}

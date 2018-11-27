@@ -16,9 +16,8 @@ import (
 
 // Files 目录
 type Files struct {
-	DB        *kit.DB // 数据库
-	TempPath  string  // 临时目录
-	FilesPath string  // 文件目录
+	TempPath  string // 临时目录
+	FilesPath string // 文件目录
 }
 
 // List 文件列表
@@ -26,18 +25,18 @@ func (d *Files) List(dir string) (files []File) {
 	key := utils.PrefixBytes([]byte(dir), _DirPrefix)
 	log.Printf("%s, %x\n", dir, key)
 	files = []File{}
-	if has, err := d.DB.Has(key); err == nil && has {
+	if has, err := _db.Has(key); err == nil && has {
 		ids := [][]byte{}
-		d.DB.Get(key, &ids)
+		_db.Get(key, &ids)
 		for _, id := range ids {
 			f := File{}
-			if d.DB.Get(id, &f) == nil {
+			if _db.Get(id, &f) == nil {
 				files = append(files, f)
 			}
 		}
 	} else {
 		m := map[string]bool{}
-		d.DB.Iterator(key, func(k, value []byte) bool {
+		_db.Iterator(key, func(k, value []byte) bool {
 			log.Printf("%v\n", k)
 			m[subName(string(k), len(key))] = true
 			return false
@@ -68,9 +67,9 @@ func subName(name string, size int) string {
 func (d *Files) AddFile(dir string, fid []byte) error {
 	key := utils.PrefixBytes([]byte(dir), _DirPrefix)
 	ids := [][]byte{}
-	d.DB.Get(key, &ids)
+	_db.Get(key, &ids)
 	ids = append(ids, fid)
-	return d.DB.Put(key, ids)
+	return _db.Put(key, ids)
 }
 
 // TempFile 临时文件
@@ -90,7 +89,7 @@ func (d *Files) Save(file, name string) error {
 	fidBs := utils.PrefixBytes(fid.ID(), _FilePrefix)
 	var data *File
 	// 不存在
-	if has, err := d.DB.Has(fidBs); err == nil && !has {
+	if has, err := _db.Has(fidBs); err == nil && !has {
 		// 创建File
 		if data, err = NewFile(file, name); err != nil {
 			return err
@@ -99,7 +98,7 @@ func (d *Files) Save(file, name string) error {
 		// 重命名
 		kit.Mkdir(fmt.Sprintf("%s/%s", d.FilesPath, data.Dir()))
 		os.Rename(file, fmt.Sprintf("%s/%s/%s", d.FilesPath, data.Dir(), data.FileName()))
-		d.DB.Put(fidBs, data)
+		_db.Put(fidBs, data)
 		d.AddFile(data.Dir(), fidBs)
 	} else {
 		// 删除

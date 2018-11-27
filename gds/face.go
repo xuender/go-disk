@@ -7,5 +7,5 @@ import (
 // Face 脸
 type Face struct {
 	face.Face        // 脸
-	ID        []byte // id
+	PeopleID        []byte // 人脸
 }
