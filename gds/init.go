@@ -2,6 +2,7 @@ package gds
 
 import (
 	"log"
+	"path/filepath"
 
 	"github.com/xuender/go-utils"
 
@@ -25,14 +26,16 @@ func InitDB(db *kit.DB) {
 }
 
 // Init 初始化
-func Init(tempPath, filesPath string) error {
-	log.Println(tempPath, filesPath)
+func Init(dataDir string) error {
+	tempPath := filepath.Join(dataDir, "temp")
+	photoPath := filepath.Join(dataDir, "photo")
+	log.Println(tempPath, photoPath)
 	if err := kit.Mkdir(tempPath); err != nil {
 		return err
 	}
 	_files = &Files{
 		TempPath:  tempPath,
-		FilesPath: filesPath,
+		PhotoPath: photoPath,
 	}
 	return nil
 }

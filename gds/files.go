@@ -17,7 +17,7 @@ import (
 // Files 目录
 type Files struct {
 	TempPath  string // 临时目录
-	FilesPath string // 文件目录
+	PhotoPath string // 照片目录
 }
 
 // List 文件列表
@@ -96,8 +96,8 @@ func (d *Files) Save(file, name string) error {
 		}
 		data.ID = fidBs
 		// 重命名
-		kit.Mkdir(fmt.Sprintf("%s/%s", d.FilesPath, data.Dir()))
-		os.Rename(file, fmt.Sprintf("%s/%s/%s", d.FilesPath, data.Dir(), data.FileName()))
+		kit.Mkdir(fmt.Sprintf("%s/%s", d.PhotoPath, data.Dir()))
+		os.Rename(file, fmt.Sprintf("%s/%s/%s", d.PhotoPath, data.Dir(), data.FileName()))
 		_db.Put(fidBs, data)
 		d.AddFile(data.Dir(), fidBs)
 	} else {

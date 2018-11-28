@@ -25,7 +25,7 @@ type File struct {
 	Sub   int       `json:"sub,omitempty"`  // 子类型
 	Size  int64     `json:"size,omitempty"` // 尺寸
 	Ca    time.Time `json:"ca"`             // 创建时间
-	ID    []byte    `json:"ID"`             // 文件ID
+	ID    []byte    `json:"id"`             // 文件ID
 	Faces []Face    `json:"faces"`          // 脸
 }
 

@@ -28,7 +28,9 @@ var rootCmd = &cobra.Command{
 	Version: "v0.0.1",
 	Long:    `网盘服务器`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dbDir, _ := filepath.Abs(kit.CmdString(cmd, _dbPathStr))
+		// 数据目录
+		dataDir, _ := filepath.Abs(kit.CmdString(cmd, _dataPathStr))
+		dbDir := filepath.Join(dataDir, "db")
 		log.Println("数据库:", dbDir)
 		db, err := kit.NewDB(dbDir)
 		if err != nil {
@@ -36,10 +38,10 @@ var rootCmd = &cobra.Command{
 		}
 		defer db.Close()
 		// 人脸识别
-		dataDir, _ := filepath.Abs(kit.CmdString(cmd, _dataPathStr))
-		log.Println("人脸识别:", dataDir)
+		modelDir := filepath.Join(dataDir, "model")
+		log.Println("人脸识别:", modelDir)
 		go func() {
-			rec, err = face.NewRecognizer(dataDir)
+			rec, err = face.NewRecognizer(modelDir)
 			if err == nil {
 				gds.InitRec(rec)
 				log.Println("人脸识别初始化成功")
@@ -50,11 +52,12 @@ var rootCmd = &cobra.Command{
 		defer func() {
 			if rec != nil {
 				rec.Close()
+				log.Println("关闭人脸识别")
 			}
 		}()
 
 		gds.InitDB(db)
-		gds.Init(kit.CmdString(cmd, _tempPathStr), kit.CmdString(cmd, _filesPathStr))
+		gds.Init(dataDir)
 
 		address := kit.CmdString(cmd, _address)
 		// 地址端口号
@@ -91,12 +94,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	pflags := rootCmd.PersistentFlags()
 	pflags.StringVarP(&_cfgFile, "config", "c", "", "配置文件")
-	pflags.StringP(_tempPathStr, "t", "temp", "临时目录")
-	pflags.StringP(_filesPathStr, "f", "files", "文件目录")
 	pflags.StringP(_dataPathStr, "p", "data", "数据目录")
 
 	flags := rootCmd.Flags()
-	flags.StringP(_dbPathStr, "d", "db", "数据库目录")
 	flags.StringP(_address, "a", "6181", "访问地址端口号")
 }
 

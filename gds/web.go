@@ -39,6 +39,8 @@ func WebStart(address string) error {
 	}
 	// 静态资源处理
 	e.Static("/", "www")
+	e.Static("/photo", _files.PhotoPath)
+
 	log.Println("Go Disk 启动...")
 	return e.Start(address)
 }

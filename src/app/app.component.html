@@ -1,6 +1,20 @@
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <router-outlet></router-outlet>
-</div>
+<mat-sidenav-container>
+  <mat-sidenav #sideNav class="sidenav" fixedInViewport="true" [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="!(isHandset$ | async)">
+    <mat-nav-list>
+      <a mat-list-item routerLink="" routerLinkActive="active">首页</a>
+      <a mat-list-item routerLink="list" routerLinkActive="active">照片列表</a>
+      <a mat-list-item routerLink="people" routerLinkActive="active">人脸识别</a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar>
+      <button mat-icon-button (click)="sideNav.toggle()">
+        <mat-icon>{{ sideNav.opened ? 'close' : 'menu' }}</mat-icon>
+      </button>
+      <span>Go Disk</span>
+    </mat-toolbar>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
