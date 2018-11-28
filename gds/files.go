@@ -120,7 +120,7 @@ func init() {
 		g.POST("", func(c echo.Context) error {
 			log.Println("上传")
 			// 来源
-			file, err := c.FormFile("uploadfile")
+			file, err := c.FormFile("file")
 			if err != nil {
 				return err
 			}

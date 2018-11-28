@@ -1,4 +1,48 @@
-<p>
-  <button mat-button color="primary">Hello World！</button>
-  <button mat-raised-button color="primary">Hello World！</button>
-</p>
+<!-- <mat-grid-list cols="2">
+  <mat-grid-tile style="background: red">
+    Tile 1
+  </mat-grid-tile>
+  <mat-grid-tile style="background: blue">
+    Tile 2
+  </mat-grid-tile>
+</mat-grid-list> -->
+<mat-card ng2FileDrop [ngClass]="{'gd-file-over': hasDropZoneOver}" (fileOver)="fileOver($event)" [uploader]="uploader"
+  class="gd-drop-zone">
+  照片拖拽到这里
+</mat-card>
+<mat-card>
+  <input type="file" ng2FileSelect [uploader]="uploader" multiple accept="image/jpeg" />
+  <p>Queue length: {{ uploader?.queue?.length }}</p>
+</mat-card>
+
+<table mat-table [dataSource]="dataSource">
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>名称</th>
+    <td mat-cell *matCellDef="let item">
+      {{ item?.file?.name }}
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="size">
+    <th mat-header-cell *matHeaderCellDef>尺寸</th>
+    <td mat-cell *matCellDef="let item">
+      {{ item?.file?.size/1024/1024 | number:'.2' }} MB
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="progress">
+    <th mat-header-cell *matHeaderCellDef>进度</th>
+    <td mat-cell *matCellDef="let item">
+      <mat-progress-bar [value]="item.progress"></mat-progress-bar>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef>状态</th>
+    <td mat-cell *matCellDef="let item">
+      <mat-icon *ngIf="item.isSuccess">check</mat-icon>
+      <mat-icon *ngIf="item.isCancel">cancel</mat-icon>
+      <mat-icon *ngIf="item.isError">close-circle</mat-icon>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

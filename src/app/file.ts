@@ -1,5 +1,3 @@
-import { FILE } from 'dns';
-
 export interface File {
   name: string
   type: Type

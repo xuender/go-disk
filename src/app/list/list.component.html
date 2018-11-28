@@ -10,7 +10,7 @@
   </button>
 </span>
 
-<table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+<table mat-table [dataSource]="dataSource" matSort>
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> 名称 </th>
     <td mat-cell *matCellDef="let file">

@@ -2,7 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material';
 import { DatePipe } from '@angular/common';
 import { File } from 'src/app/file';
-import * as crypto from 'crypto-js'
+import { enc } from 'crypto-js'
 import { environment } from "../../../environments/environment";
 
 @Component({
@@ -20,7 +20,7 @@ export class SingleComponent implements OnInit {
     this.photo = data
     this.src = `${environment.url}/photo/${
       dataPipe.transform(data.ca, 'yyyy/MM/dd')
-      }/${crypto.enc.Hex.stringify(crypto.enc.Base64.parse(data.id))}.jpg`
+      }/${enc.Hex.stringify(enc.Base64.parse(data.id))}.jpg`
   }
 
   ngOnInit() {

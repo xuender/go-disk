@@ -3,6 +3,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
+import { FileUploadModule } from 'ng2-file-upload';
 import {
   MatButtonModule,
   MatIconModule,
@@ -13,6 +14,9 @@ import {
   MatSortModule,
   MatPaginatorModule,
   MatDialogModule,
+  MatCardModule,
+  MatGridListModule,
+  MatProgressBarModule,
 } from '@angular/material';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -43,6 +47,11 @@ import { SingleComponent } from './photo/single/single.component';
     MatSortModule,
     MatPaginatorModule,
     MatDialogModule,
+    MatCardModule,
+    MatGridListModule,
+    MatProgressBarModule,
+
+    FileUploadModule,
     AppRoutingModule,
   ],
   providers: [DatePipe],

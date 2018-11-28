@@ -15,7 +15,7 @@ func PostFile(filename, targetURL string) (statusCode int, body []byte, err erro
 	bodyBuf := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(bodyBuf)
 	// 创建FormFile
-	fileWriter, err := bodyWriter.CreateFormFile("uploadfile", filename)
+	fileWriter, err := bodyWriter.CreateFormFile("file", filename)
 	if err != nil {
 		return
 	}
