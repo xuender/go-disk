@@ -40,7 +40,7 @@ func (f *File) FileName() string {
 }
 
 // NewFile 创建文件
-func NewFile(path, name string) (file *File, err error) {
+func NewFile(path, name string, fid []byte) (file *File, err error) {
 	photo, err := kit.NewPhoto(path, _rec)
 	if err != nil {
 		return
@@ -57,7 +57,7 @@ func NewFile(path, name string) (file *File, err error) {
 		for _, f := range photo.Faces {
 			face := Face{}
 			face.Face = f
-			face.PeopleID = _peoples.PeopleID(f)
+			face.PeopleID = _peoples.PeopleID(f, fid)
 			file.Faces = append(file.Faces, face)
 		}
 	}

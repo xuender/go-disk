@@ -23,7 +23,6 @@ type Files struct {
 // List 文件列表
 func (d *Files) List(dir string) (files []File) {
 	key := utils.PrefixBytes([]byte(dir), _DirPrefix)
-	log.Printf("%s, %x\n", dir, key)
 	files = []File{}
 	if has, err := _db.Has(key); err == nil && has {
 		ids := [][]byte{}
@@ -37,7 +36,6 @@ func (d *Files) List(dir string) (files []File) {
 	} else {
 		m := map[string]bool{}
 		_db.Iterator(key, func(k, value []byte) bool {
-			log.Printf("%v\n", k)
 			m[subName(string(k), len(key))] = true
 			return false
 		})
@@ -91,7 +89,7 @@ func (d *Files) Save(file, name string) error {
 	// 不存在
 	if has, err := _db.Has(fidBs); err == nil && !has {
 		// 创建File
-		if data, err = NewFile(file, name); err != nil {
+		if data, err = NewFile(file, name, fidBs); err != nil {
 			return err
 		}
 		data.ID = fidBs

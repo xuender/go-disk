@@ -1,3 +1,20 @@
-<p>
-  people works!
-</p>
+<mat-grid-list cols="6" *ngIf="peoples$ | async as peoples; else loading">
+  <mat-grid-tile *ngFor="let p of peoples">
+    <mat-card>
+      <mat-card-title>
+        {{p.name}}
+      </mat-card-title>
+      <mat-card-subtitle>
+        测试数据
+      </mat-card-subtitle>
+      <img mat-card-image *ngFor="let f of p.faces" [src]="url(f.peopleID,0)">
+      <mat-card-actions>
+        <button>设置</button>
+      </mat-card-actions>
+    </mat-card>
+  </mat-grid-tile>
+</mat-grid-list>
+
+<ng-template #loading>
+  加载中...
+</ng-template>

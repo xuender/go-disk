@@ -29,7 +29,11 @@
 
   <ng-container matColumnDef="ca">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> 时间 </th>
-    <td mat-cell *matCellDef="let file"> {{file.ca | date:'yyyy-MM-dd HH:mm:ss'}} </td>
+    <td mat-cell *matCellDef="let file">
+      <span *ngIf="file.type > 0">
+        {{file.ca | date:'yyyy-MM-dd HH:mm:ss'}}
+      </span>
+    </td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
